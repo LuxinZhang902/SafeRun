@@ -189,13 +189,22 @@ class DaytonaClient {
 
   async destroyById(sandboxId: string) {
     try {
-      console.log(`[Daytona] Destroying sandbox by ID: ${sandboxId}`);
-      const daytona = this.getDaytona();
-      const sandbox = await daytona.create({ id: sandboxId });
-      await sandbox.delete();
-      this.sandboxes.delete(sandboxId);
-      console.log(`[Daytona] Destroyed: ${sandboxId}`);
-      return { success: true };
+      console.log(`[Daytona] Attempting to destroy sandbox by ID: ${sandboxId}`);
+      
+      // Check if sandbox is in our local map
+      const sandbox = this.sandboxes.get(sandboxId);
+      if (sandbox) {
+        console.log(`[Daytona] Found sandbox in cache, deleting...`);
+        await sandbox.delete();
+        this.sandboxes.delete(sandboxId);
+        console.log(`[Daytona] Destroyed: ${sandboxId}`);
+        return { success: true };
+      }
+      
+      // If not in cache, we can't destroy it via SDK
+      console.log(`[Daytona] Sandbox ${sandboxId} not in cache. Cannot destroy via SDK.`);
+      console.log(`[Daytona] Please use Daytona dashboard to manage this sandbox.`);
+      throw new Error(`Sandbox ${sandboxId} not found in local cache. Use Daytona dashboard to destroy it.`);
     } catch (error) {
       console.error(`[Daytona] Failed to destroy ${sandboxId}:`, error);
       throw error;
