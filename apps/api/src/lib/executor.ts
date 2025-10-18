@@ -280,6 +280,18 @@ export async function executePlan(
 
     // Execute steps in the cloned repository
     for (const step of plan.steps) {
+      // Skip 'run' step as it's a long-running process
+      // The built static files will be served automatically
+      if (step.verb === 'run') {
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: `Skipping run step - application is built and ready`,
+          step: step.name,
+        });
+        continue;
+      }
+
       await executeStep(
         workspace.id,
         { ...step, workdir: step.workdir || 'repo' },
@@ -290,6 +302,12 @@ export async function executePlan(
 
     // Expose ports if specified
     if (plan.ports && plan.ports.length > 0) {
+      logWrapper({
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        message: `Exposing ports: ${plan.ports.join(', ')}`,
+      });
+
       for (const port of plan.ports) {
         try {
           const exposed = await daytonaClient.expose(workspace.id, port);
@@ -297,7 +315,7 @@ export async function executePlan(
           logWrapper({
             timestamp: new Date().toISOString(),
             level: 'success',
-            message: `Port ${port} exposed at: ${exposed.url}`,
+            message: `🌐 Preview URL: ${exposed.url}`,
           });
         } catch (error) {
           logWrapper({
