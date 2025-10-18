@@ -1,0 +1,21 @@
+version: "1.0"
+name: flask-app-example
+runtime: python:3.11
+
+steps:
+  - name: Install dependencies
+    verb: install
+    timeout: 300000
+
+  - name: Run Flask app
+    verb: run
+    args: ["app.py"]
+    env:
+      FLASK_APP: app.py
+      FLASK_ENV: production
+      PORT: "5000"
+
+ports:
+  - 5000
+
+healthcheck: /health
