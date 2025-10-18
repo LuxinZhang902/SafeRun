@@ -66,6 +66,19 @@ export default function Home() {
   };
 
   const generatePlan = async () => {
+    // Warn if security check hasn't been run
+    if (!security) {
+      const proceed = window.confirm(
+        '⚠️ Security Check Recommended\n\n' +
+        'You haven\'t run a security check yet. It\'s recommended to analyze the repository security before generating an execution plan.\n\n' +
+        'Do you want to proceed anyway?'
+      );
+      
+      if (!proceed) {
+        return;
+      }
+    }
+
     setPlanLoading(true);
     setError('');
     setPlan(null);
@@ -278,7 +291,7 @@ export default function Home() {
 
               <button
                 onClick={generatePlan}
-                disabled={loading || planLoading || securityLoading || !repoUrl || !security}
+                disabled={loading || planLoading || securityLoading || !repoUrl}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed px-8 py-3.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-500/50 disabled:shadow-none flex items-center gap-2 justify-center"
               >
                 {planLoading ? (
@@ -301,14 +314,22 @@ export default function Home() {
             </div>
 
             {/* Helper text */}
-            {!security && !securityLoading && (
+            {!security && !securityLoading && !plan && !planLoading && (
               <p className="text-sm text-gray-400 text-center">
-                👆 Start with Security Check to analyze the repository
+                💡 <strong>Recommended:</strong> Start with Security Check • Or skip directly to Generate Plan
               </p>
             )}
             {security && !plan && !planLoading && (
               <p className="text-sm text-gray-400 text-center">
                 ✅ Security analyzed • Now generate an execution plan
+              </p>
+            )}
+            {plan && !security && (
+              <p className="text-sm text-yellow-400 text-center flex items-center justify-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                Plan generated without security check
               </p>
             )}
           </div>
