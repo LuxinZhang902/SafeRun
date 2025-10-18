@@ -100,13 +100,21 @@ class DaytonaClient {
       throw new Error(`Sandbox ${workspaceId} not found`);
     }
 
-    // Get preview URL (Daytona automatically exposes ports)
-    const previewUrl = `https://${sandbox.id}-${port}.daytona.app`;
-
-    return {
-      url: previewUrl,
-      port,
-    };
+    try {
+      // Use Daytona SDK's getPreviewLink to get the actual preview URL
+      console.log(`[Daytona] Getting preview link for port ${port}...`);
+      const previewLink = await sandbox.getPreviewLink(port);
+      
+      console.log(`[Daytona] Preview URL: ${previewLink.url}`);
+      
+      return {
+        url: previewLink.url,
+        port,
+      };
+    } catch (error) {
+      console.error(`[Daytona] Failed to get preview link:`, error);
+      throw new Error(`Failed to expose port ${port}: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   async destroy(workspaceId: string) {

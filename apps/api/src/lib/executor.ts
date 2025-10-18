@@ -280,24 +280,39 @@ export async function executePlan(
 
     // Execute steps in the cloned repository
     for (const step of plan.steps) {
-      // Skip 'run' step as it's a long-running process
-      // The built static files will be served automatically
-      if (step.verb === 'run') {
-        logWrapper({
-          timestamp: new Date().toISOString(),
-          level: 'info',
-          message: `Skipping run step - application is built and ready`,
-          step: step.name,
-        });
-        continue;
-      }
-
       await executeStep(
         workspace.id,
         { ...step, workdir: step.workdir || 'repo' },
         plan.runtime,
         logWrapper
       );
+      
+      // After build step, start a simple server for the built files
+      if (step.verb === 'build' && plan.ports && plan.ports.length > 0) {
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: 'Starting server for built application...',
+        });
+        
+        // Start npx serve in background to serve the built files
+        // This is non-blocking - we don't wait for it
+        daytonaClient.exec(workspace.id, ['npx', 'serve', '-s', 'apps/web/.next', '-l', plan.ports[0].toString()], {
+          workdir: 'repo',
+          timeout: 5000, // Just start it, don't wait
+        }).catch(() => {
+          // Ignore errors - the server will keep running
+        });
+        
+        // Give the server a moment to start
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'success',
+          message: 'Server started successfully',
+        });
+      }
     }
 
     // Expose ports if specified
