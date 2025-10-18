@@ -18,38 +18,28 @@ pnpm install
 cp .env.example .env
 ```
 
-Edit `.env` and add your Anthropic API key:
-
+Edit `.env` and add your API keys:
 ```env
+# Anthropic API Key (for security analysis)
 ANTHROPIC_API_KEY=sk-ant-your-key-here
-DAYTONA_BASE_URL=http://localhost:3986
+
+# Daytona API Key (for code execution)
+DAYTONA_BASE_URL=https://api.daytona.io
+DAYTONA_API_KEY=your-daytona-api-key-here
 ```
+
+- **Anthropic:** https://console.anthropic.com/
+- **Daytona:** https://www.daytona.io/
 
 ### 3️⃣ Start Development Servers
 
-**Option A: Start Everything (Recommended)**
-
 ```bash
-pnpm dev:full
-```
-
-This starts:
-
-- **Mock Daytona Server**: http://localhost:3986
-- **API**: http://localhost:3000
-- **Web**: http://localhost:3001
-
-**Option B: Start Separately**
-
-```bash
-# Terminal 1: Mock Daytona Server
-pnpm daytona:mock
-
-# Terminal 2: SafeRun API & Web
 pnpm dev
 ```
 
-> ⚠️ **Note**: We use a mock Daytona server for local development. See [DAYTONA_SETUP.md](./DAYTONA_SETUP.md) for details.
+This starts:
+- **API**: http://localhost:3000
+- **Web**: http://localhost:3001
 
 ### 4️⃣ Try It Out
 

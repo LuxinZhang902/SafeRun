@@ -5,8 +5,6 @@
   "description": "SafeRun - AI-Powered Secure Code Execution Platform",
   "scripts": {
     "dev": "pnpm --filter api dev & pnpm --filter web dev",
-    "dev:full": "node mock-daytona-server.js & pnpm --filter api dev & pnpm --filter web dev",
-    "daytona:mock": "node mock-daytona-server.js",
     "build": "pnpm --filter api build && pnpm --filter web build",
     "test": "pnpm --filter api test",
     "start": "pnpm --filter api start & pnpm --filter web start"
