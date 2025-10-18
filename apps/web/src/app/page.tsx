@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 interface Log {
   timestamp: string;
@@ -23,6 +24,47 @@ interface SecurityInfo {
   categories: Array<{ name: string; severity: string; description: string }>;
   explanation: string;
   recommendations: string[];
+}
+
+// Threat Panel Character Component
+function ThreatPanelCharacter({ riskScore, riskLevel }: { riskScore: number; riskLevel: string }) {
+  const [frame, setFrame] = useState(1);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFrame((prev) => (prev % 3) + 1);
+    }, 300);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getCharacterPath = () => {
+    if (riskScore === 0 || riskLevel === 'low') {
+      return `/threat-panel/office/office_cat_thumbsup_${frame}.png`;
+    } else if (riskScore < 30) {
+      return `/threat-panel/office/office_dog_happy_${frame}.png`;
+    } else if (riskScore < 50) {
+      return `/threat-panel/cyber/cat_cyber_idle_0${frame}.png`;
+    } else if (riskScore < 70) {
+      return `/threat-panel/cyber/cat_cyber_angry_0${frame}.png`;
+    } else if (riskScore < 85) {
+      return `/threat-panel/cyber/cat_cyber_angrier_0${frame}.png`;
+    } else {
+      return `/threat-panel/cyber/cat_cyber_veryangry_0${frame}.png`;
+    }
+  };
+
+  return (
+    <div className="relative w-48 h-48 flex items-center justify-center">
+      <Image
+        src={getCharacterPath()}
+        alt="Threat Level"
+        width={192}
+        height={192}
+        className="object-contain"
+        priority
+      />
+    </div>
+  );
 }
 
 export default function Home() {
@@ -451,43 +493,100 @@ export default function Home() {
 
         {/* Security Analysis */}
         {security && (
-          <div className="grid md:grid-cols-2 gap-6 mb-8 max-w-3xl mx-auto">
-            {/* Risk Score Card */}
+          <div className="mb-8 max-w-4xl mx-auto">
+            {/* Threat Panel with Character */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-slate-700/50 mb-6">
+              <div className="flex flex-col md:flex-row items-center gap-8">
+                {/* Animated Character */}
+                <div className="flex-shrink-0">
+                  <ThreatPanelCharacter riskScore={security.risk_score} riskLevel={security.risk_level} />
+                </div>
+                
+                {/* Risk Information */}
+                <div className="flex-1 text-center md:text-left">
+                  <h3 className="text-2xl font-bold mb-3 flex items-center gap-3 justify-center md:justify-start">
+                    <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    Security Analysis
+                  </h3>
+                  <div className="flex items-center gap-4 mb-4 justify-center md:justify-start flex-wrap">
+                    <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${getRiskColor(security.risk_level)} flex items-center justify-center shadow-lg`}>
+                      <span className="text-2xl font-bold">{security.risk_score}</span>
+                    </div>
+                    <div>
+                      <span className={`inline-block px-4 py-2 rounded-lg border font-semibold text-sm ${getRiskBadgeColor(security.risk_level)}`}>
+                        {security.risk_level.toUpperCase()} RISK
+                      </span>
+                      <p className="text-sm text-gray-300 mt-2">Readiness: {security.readiness_score}/100</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-400 leading-relaxed">{security.explanation}</p>
+                </div>
+              </div>
+
+              {/* Severity Level Bar */}
+              <div className="mt-8 pt-6 border-t border-slate-700/50">
+                <h4 className="text-sm font-semibold text-gray-400 mb-4 text-center">THREAT LEVEL SCALE</h4>
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+                  {[
+                    { score: 0, label: 'Safe', color: 'from-green-500 to-emerald-600', character: 'cat', mood: 'thumbsup' },
+                    { score: 25, label: 'Low', color: 'from-blue-500 to-cyan-600', character: 'dog', mood: 'happy' },
+                    { score: 40, label: 'Medium', color: 'from-yellow-500 to-orange-500', character: 'cat', mood: 'idle' },
+                    { score: 60, label: 'High', color: 'from-orange-500 to-red-500', character: 'cat', mood: 'angry' },
+                    { score: 75, label: 'Very High', color: 'from-red-500 to-rose-600', character: 'cat', mood: 'angrier' },
+                    { score: 90, label: 'Critical', color: 'from-rose-600 to-red-700', character: 'cat', mood: 'veryangry' },
+                  ].map((level) => (
+                    <div
+                      key={level.score}
+                      className={`relative p-3 rounded-xl border-2 transition-all ${
+                        security.risk_score >= level.score - 10 && security.risk_score <= level.score + 10
+                          ? 'border-white shadow-lg scale-105'
+                          : 'border-slate-700/50 opacity-60 hover:opacity-100'
+                      }`}
+                    >
+                      <div className="relative w-16 h-16 mx-auto mb-2">
+                        <Image
+                          src={level.character === 'cat' 
+                            ? (level.mood === 'thumbsup' 
+                                ? '/threat-panel/office/office_cat_thumbsup_1.png'
+                                : `/threat-panel/cyber/cat_cyber_${level.mood}_01.png`)
+                            : '/threat-panel/office/office_dog_happy_1.png'}
+                          alt={level.label}
+                          width={64}
+                          height={64}
+                          className="object-contain"
+                        />
+                      </div>
+                      <div className={`w-full h-1 rounded-full bg-gradient-to-r ${level.color} mb-2`}></div>
+                      <p className="text-xs font-semibold text-center text-gray-300">{level.label}</p>
+                      <p className="text-xs text-center text-gray-500">{level.score}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid md:grid-cols-2 gap-6">
+            {/* Threat Categories */}
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-slate-700/50">
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <svg
-                  className="w-5 h-5 text-red-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  />
+                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                Security Risk
+                Threat Categories
               </h3>
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-24 h-24 rounded-full bg-gradient-to-br ${getRiskColor(
-                    security.risk_level
-                  )} flex items-center justify-center shadow-lg`}
-                >
-                  <span className="text-3xl font-bold">{security.risk_score}</span>
-                </div>
-                <div className="flex-1">
-                  <span
-                    className={`inline-block px-4 py-2 rounded-lg border font-semibold text-sm ${getRiskBadgeColor(
-                      security.risk_level
-                    )}`}
-                  >
-                    {security.risk_level.toUpperCase()}
-                  </span>
-                  <p className="text-xs text-gray-400 mt-2 line-clamp-2">{security.explanation}</p>
-                </div>
+              <div className="space-y-3">
+                {security.categories.map((cat, idx) => (
+                  <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/30">
+                    <span className={`w-3 h-3 rounded-full mt-1 flex-shrink-0 ${cat.severity === 'high' ? 'bg-red-500' : cat.severity === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'}`}></span>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-200">{cat.name}</p>
+                      <p className="text-xs text-gray-400 mt-1">{cat.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -523,6 +622,7 @@ export default function Home() {
                   <p className="text-sm text-gray-400">Repository execution readiness</p>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         )}
