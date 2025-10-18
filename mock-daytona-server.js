@@ -59,10 +59,12 @@ app.post('/workspace/:id/exec', async (req, res) => {
   
   try {
     // Execute command locally (WARNING: This is for demo only!)
+    // Use shell to ensure PATH is properly resolved
     const proc = spawn(command[0], command.slice(1), {
       cwd: workdir || process.cwd(),
       env: { ...process.env, ...env },
       timeout: timeout || 300000,
+      shell: true, // Enable shell to resolve commands like git, npm, etc.
     });
     
     let stdout = '';
