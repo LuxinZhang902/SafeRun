@@ -1,0 +1,39 @@
+{
+  "ranges": [
+    {
+      "min": 0,
+      "max": 10,
+      "state": "excellent",
+      "cat": "office_cat_celebrate.json",
+      "dog": "office_dog_celebrate.json"
+    },
+    {
+      "min": 11,
+      "max": 40,
+      "state": "fine",
+      "cat": "office_cat_idle.json",
+      "dog": "office_dog_idle.json"
+    },
+    {
+      "min": 41,
+      "max": 70,
+      "state": "critical",
+      "cat": "medieval_cat_idle.json",
+      "dog": "medieval_dog_idle.json"
+    },
+    {
+      "min": 71,
+      "max": 90,
+      "state": "bad",
+      "cat": "cyber_cat_angry.json",
+      "dog": "cyber_dog_angry.json"
+    },
+    {
+      "min": 91,
+      "max": 100,
+      "state": "very_bad",
+      "cat": "cyber_cat_veryangry.json",
+      "dog": "cyber_dog_veryangry.json"
+    }
+  ]
+}
