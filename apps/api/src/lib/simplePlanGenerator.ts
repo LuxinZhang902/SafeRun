@@ -20,26 +20,11 @@ export function generateSimplePlan(
     try {
       const pkg = JSON.parse(manifests['package.json']);
 
-      // Detect package manager
-      let installVerb: 'install' = 'install';
-      let installArgs: string[] = ['install'];
-
-      if (manifests['pnpm-lock.yaml'] || pkg.packageManager?.includes('pnpm')) {
-        // pnpm detected
-        installArgs = ['install'];
-      } else if (manifests['yarn.lock']) {
-        // yarn detected
-        installArgs = ['install'];
-      } else {
-        // npm (default)
-        installArgs = ['install'];
-      }
-
-      // Add install step
+      // Add install step (args should be empty - executor adds 'install' command)
       steps.push({
         name: 'Install dependencies',
-        verb: installVerb,
-        args: installArgs,
+        verb: 'install',
+        args: [], // Empty - executor will add 'pnpm install' or 'npm install'
       });
 
       // Add build step if build script exists
@@ -47,7 +32,7 @@ export function generateSimplePlan(
         steps.push({
           name: 'Build application',
           verb: 'build',
-          args: ['run', 'build'],
+          args: [], // Empty - executor will add 'npm run build'
         });
       }
 
@@ -56,14 +41,14 @@ export function generateSimplePlan(
         steps.push({
           name: 'Start application',
           verb: 'run',
-          args: ['start'],
+          args: [], // Empty - executor will add 'npm start'
         });
         ports.push(3000); // Assume port 3000 for web apps
       } else if (pkg.scripts?.dev) {
         steps.push({
           name: 'Start development server',
           verb: 'run',
-          args: ['run', 'dev'],
+          args: [], // Empty - executor will add 'npm run dev' or similar
         });
         ports.push(3000);
       }
@@ -72,7 +57,7 @@ export function generateSimplePlan(
       steps.push({
         name: 'Install dependencies',
         verb: 'install',
-        args: ['install'],
+        args: [], // Empty - executor will add 'npm install'
       });
     }
   }
