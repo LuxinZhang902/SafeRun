@@ -115,26 +115,35 @@ async function executeStep(
       timeout: step.timeout,
     });
 
-    if (result.stdout) {
+    // Log stdout if present
+    if (result.stdout && result.stdout.trim()) {
       onLog({
         timestamp: new Date().toISOString(),
         level: 'info',
-        message: result.stdout,
+        message: `Output: ${result.stdout.trim()}`,
         step: step.name,
       });
     }
 
-    if (result.stderr) {
+    // Log stderr if present
+    if (result.stderr && result.stderr.trim()) {
       onLog({
         timestamp: new Date().toISOString(),
         level: 'error',
-        message: result.stderr,
+        message: `Error output: ${result.stderr.trim()}`,
         step: step.name,
       });
     }
 
+    // Check exit code
     if (result.exitCode !== 0) {
-      throw new Error(`Command failed with exit code ${result.exitCode}`);
+      const errorDetails = [
+        `Command failed with exit code ${result.exitCode}`,
+        result.stdout ? `stdout: ${result.stdout.trim()}` : null,
+        result.stderr ? `stderr: ${result.stderr.trim()}` : null,
+      ].filter(Boolean).join(' | ');
+      
+      throw new Error(errorDetails);
     }
 
     onLog({
@@ -144,10 +153,11 @@ async function executeStep(
       step: step.name,
     });
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     onLog({
       timestamp: new Date().toISOString(),
       level: 'error',
-      message: `Step failed: ${error instanceof Error ? error.message : String(error)}`,
+      message: `Step failed: ${errorMessage}`,
       step: step.name,
     });
     throw error;
