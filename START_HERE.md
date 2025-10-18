@@ -19,6 +19,7 @@ cp .env.example .env
 ```
 
 Edit `.env` and add your Anthropic API key:
+
 ```env
 ANTHROPIC_API_KEY=sk-ant-your-key-here
 DAYTONA_BASE_URL=http://localhost:3986
@@ -27,16 +28,19 @@ DAYTONA_BASE_URL=http://localhost:3986
 ### 3️⃣ Start Development Servers
 
 **Option A: Start Everything (Recommended)**
+
 ```bash
 pnpm dev:full
 ```
 
 This starts:
+
 - **Mock Daytona Server**: http://localhost:3986
 - **API**: http://localhost:3000
 - **Web**: http://localhost:3001
 
 **Option B: Start Separately**
+
 ```bash
 # Terminal 1: Mock Daytona Server
 pnpm daytona:mock
@@ -68,23 +72,28 @@ This tests the security layer with various threat scenarios.
 ## 📚 What to Read Next
 
 ### For First-Time Users
+
 → [QUICKSTART.md](./QUICKSTART.md) - Detailed setup guide  
 → [DEMO.md](./DEMO.md) - Demo walkthrough
 
 ### For Developers
+
 → [ARCHITECTURE.md](./ARCHITECTURE.md) - System design  
 → [API.md](./API.md) - API documentation  
 → [SAFERUN_SECURITY.md](./SAFERUN_SECURITY.md) - Security layer details  
 → [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guide
 
 ### For DevOps
+
 → [DEPLOYMENT.md](./DEPLOYMENT.md) - Production deployment  
 → [VERIFICATION.md](./VERIFICATION.md) - Testing checklist  
 → [SAFERUN_IMPLEMENTATION.md](./SAFERUN_IMPLEMENTATION.md) - Security implementation
 
 ### Need Help?
+
 → [INDEX.md](./INDEX.md) - Complete documentation index  
 → [QUICKSTART.md#troubleshooting](./QUICKSTART.md#troubleshooting) - Common issues
+
 ---
 
 ## 🎯 What is Initium?
@@ -206,6 +215,7 @@ pnpm test
 ## 📊 What's Included
 
 ### Code
+
 - ✅ Complete TypeScript backend (Fastify)
 - ✅ Modern React frontend (Next.js)
 - ✅ 31+ unit tests
@@ -213,6 +223,7 @@ pnpm test
 - ✅ 3 API endpoints
 
 ### Documentation
+
 - ✅ 13 markdown files (3,850+ lines)
 - ✅ Complete API reference
 - ✅ Architecture deep dive
@@ -220,6 +231,7 @@ pnpm test
 - ✅ Demo script
 
 ### Examples
+
 - ✅ Node.js/Remix plan
 - ✅ Python/Flask plan
 - ✅ Setup scripts
@@ -251,15 +263,19 @@ pnpm test
 ## 🆘 Troubleshooting
 
 ### "ANTHROPIC_API_KEY is not set"
+
 → Add your API key to `.env`
 
 ### "Failed to create workspace"
+
 → Check Daytona is running: `curl $DAYTONA_BASE_URL/health`
 
 ### "Port already in use"
+
 → Change ports in `.env` and `apps/web/package.json`
 
 ### Still stuck?
+
 → See [QUICKSTART.md#troubleshooting](./QUICKSTART.md#troubleshooting)
 
 ---

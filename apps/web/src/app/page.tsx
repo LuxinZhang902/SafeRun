@@ -28,6 +28,7 @@ interface SecurityInfo {
 export default function Home() {
   const [repoUrl, setRepoUrl] = useState('https://github.com/remix-run/examples/tree/main/basic');
   const [loading, setLoading] = useState(false);
+  const [securityLoading, setSecurityLoading] = useState(false);
   const [planLoading, setPlanLoading] = useState(false);
   const [plan, setPlan] = useState<any>(null);
   const [planYaml, setPlanYaml] = useState('');
@@ -38,12 +39,37 @@ export default function Home() {
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
+  const analyzeSecurity = async () => {
+    setSecurityLoading(true);
+    setError('');
+    setSecurity(null);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/plan`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repoUrl }),
+      });
+
+      const data = await response.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to analyze security');
+      }
+
+      setSecurity(data.security);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to analyze security');
+    } finally {
+      setSecurityLoading(false);
+    }
+  };
+
   const generatePlan = async () => {
     setPlanLoading(true);
     setError('');
     setPlan(null);
     setPlanYaml('');
-    setSecurity(null);
 
     try {
       const response = await fetch(`${API_BASE}/api/plan`, {
@@ -60,7 +86,9 @@ export default function Home() {
 
       setPlan(data.plan);
       setPlanYaml(data.yaml);
-      setSecurity(data.security);
+      if (!security) {
+        setSecurity(data.security);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate plan');
     } finally {
@@ -220,30 +248,69 @@ export default function Home() {
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="https://github.com/owner/repo"
               className="w-full bg-slate-900/70 border border-slate-600/50 rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all placeholder-gray-500 text-white text-center"
-              disabled={loading || planLoading}
+              disabled={loading || planLoading || securityLoading}
             />
-            <button
-              onClick={generatePlan}
-              disabled={loading || planLoading || !repoUrl}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed px-8 py-3.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-500/50 disabled:shadow-none flex items-center gap-2 w-full sm:w-auto justify-center"
-            >
-              {planLoading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Analyze & Generate
-                </>
-              )}
-            </button>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <button
+                onClick={analyzeSecurity}
+                disabled={loading || planLoading || securityLoading || !repoUrl}
+                className="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed px-8 py-3.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-orange-500/50 disabled:shadow-none flex items-center gap-2 justify-center"
+              >
+                {securityLoading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Analyzing Security...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Security Check
+                  </>
+                )}
+              </button>
+
+              <button
+                onClick={generatePlan}
+                disabled={loading || planLoading || securityLoading || !repoUrl || !security}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed px-8 py-3.5 rounded-xl font-semibold transition-all shadow-lg hover:shadow-blue-500/50 disabled:shadow-none flex items-center gap-2 justify-center"
+              >
+                {planLoading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Generating Plan...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    Generate Plan
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Helper text */}
+            {!security && !securityLoading && (
+              <p className="text-sm text-gray-400 text-center">
+                👆 Start with Security Check to analyze the repository
+              </p>
+            )}
+            {security && !plan && !planLoading && (
+              <p className="text-sm text-gray-400 text-center">
+                ✅ Security analyzed • Now generate an execution plan
+              </p>
+            )}
           </div>
         </div>
 
