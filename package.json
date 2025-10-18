@@ -1,0 +1,15 @@
+{
+  "name": "initium",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secure code execution platform with Daytona integration",
+  "scripts": {
+    "dev": "pnpm --filter api dev & pnpm --filter web dev",
+    "build": "pnpm --filter api build && pnpm --filter web build",
+    "test": "pnpm --filter api test",
+    "start": "pnpm --filter api start & pnpm --filter web start"
+  },
+  "keywords": ["daytona", "code-execution", "ai"],
+  "author": "",
+  "license": "MIT"
+}
