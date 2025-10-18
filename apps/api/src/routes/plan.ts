@@ -41,21 +41,45 @@ export async function planRoutes(fastify: FastifyInstance) {
           totalHits: securityScan.totalHits 
         }, 'Security scan completed');
 
-        // Step 3: Run Claude security analysis
-        const securityAnalysis = await analyzeRepositorySecurity({
-          repoUrl,
-          readme: repoContext.readme,
-          manifests: repoContext.manifests,
-          structure: repoContext.structure,
-          analysis: repoContext.analysis,
-          securityScan,
-        });
+        // Step 3: Run Claude security analysis (if API key available)
+        let securityAnalysis;
+        try {
+          securityAnalysis = await analyzeRepositorySecurity({
+            repoUrl,
+            readme: repoContext.readme,
+            manifests: repoContext.manifests,
+            structure: repoContext.structure,
+            analysis: repoContext.analysis,
+            securityScan,
+          });
 
-        request.log.info({
-          riskScore: securityAnalysis.risk_score,
-          riskLevel: securityAnalysis.risk_level,
-          readinessScore: securityAnalysis.readiness_score,
-        }, 'Security analysis completed');
+          request.log.info({
+            riskScore: securityAnalysis.risk_score,
+            riskLevel: securityAnalysis.risk_level,
+            readinessScore: securityAnalysis.readiness_score,
+          }, 'Security analysis completed');
+        } catch (error) {
+          // If AI security fails (no API key), use PromptShield only
+          request.log.warn('AI security analysis failed, using PromptShield only');
+          
+          const riskLevel = getRiskLevel(securityScan.baseScore);
+          securityAnalysis = {
+            risk_score: securityScan.baseScore,
+            risk_level: riskLevel,
+            readiness_score: 70,
+            categories: securityScan.categories.map(cat => ({
+              name: cat.name,
+              severity: cat.pct > 50 ? 'high' : cat.pct > 20 ? 'medium' : 'low',
+              description: `${cat.hits} security patterns detected in this category`,
+            })),
+            explanation: 'Security analysis based on PromptShield scan only (AI analysis unavailable).',
+            recommendations: [
+              'Add ANTHROPIC_API_KEY for AI-powered security analysis',
+              'Review the detected security patterns manually',
+              'Test in a safe environment before production use',
+            ],
+          };
+        }
 
         // Step 4: Generate execution plan (simple detection - NO AI)
         const plan = generateSimplePlan(repoUrl, repoContext.manifests);
