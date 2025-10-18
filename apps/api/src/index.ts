@@ -13,9 +13,13 @@ const fastify = Fastify({
 
 async function start() {
   try {
-    // Register CORS
+    // Register CORS with proper headers for SSE
     await fastify.register(cors, {
-      origin: config.nodeEnv === 'development' ? '*' : false,
+      origin: config.nodeEnv === 'development' ? true : false,
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+      exposedHeaders: ['Content-Type'],
     });
 
     // Health check

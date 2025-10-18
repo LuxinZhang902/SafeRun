@@ -20,11 +20,14 @@ export async function runRoutes(fastify: FastifyInstance) {
         });
       }
 
-      // Set SSE headers
+      // Set SSE headers with CORS
       reply.raw.writeHead(200, {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
       });
 
       // Send existing logs
