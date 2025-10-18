@@ -37,7 +37,6 @@ class DaytonaClient {
   async createWorkspace(params: CreateWorkspaceParams) {
     // Create sandbox using official SDK
     const daytona = this.getDaytona();
-    
     // Convert MB to GiB for Daytona SDK (SDK expects memory in GiB)
     const memoryMB = params.memoryMB || 2048;
     const memoryGiB = Math.ceil(memoryMB / 1024); // Convert MB to GiB, max 8 GiB
@@ -50,7 +49,7 @@ class DaytonaClient {
       },
     });
 
-    // Store sandbox reference
+    // Store sandbox in map
     this.sandboxes.set(sandbox.id, sandbox);
 
     return {
@@ -58,6 +57,31 @@ class DaytonaClient {
       name: params.name,
       status: 'running',
     };
+  }
+
+  async connectToExistingSandbox(sandboxId: string) {
+    try {
+      console.log(`[Daytona] Connecting to existing sandbox: ${sandboxId}`);
+      
+      // Check if already in map
+      if (this.sandboxes.has(sandboxId)) {
+        console.log(`[Daytona] Sandbox already in cache`);
+        return this.sandboxes.get(sandboxId)!;
+      }
+      
+      const daytona = this.getDaytona();
+      
+      // The Daytona SDK doesn't have a direct "get" method
+      // We need to create a new connection, which will connect to existing if ID matches
+      console.log(`[Daytona] Note: Daytona SDK doesn't support reconnecting to existing sandboxes`);
+      console.log(`[Daytona] Sandbox ${sandboxId} exists but is not in our local cache`);
+      console.log(`[Daytona] You can access it at: https://3000-${sandboxId}.proxy.daytona.works`);
+      
+      throw new Error(`Cannot reconnect to existing sandbox. Daytona SDK limitation.`);
+    } catch (error) {
+      console.error(`[Daytona] Failed to connect to sandbox:`, error);
+      throw error;
+    }
   }
 
   async exec(workspaceId: string, command: string[], options: ExecOptions = {}) {
@@ -88,7 +112,8 @@ class DaytonaClient {
         exitCode: result.exitCode,
       };
     } catch (error) {
-      throw new Error(`Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`[Daytona] Command execution error:`, error);
+      throw new Error(`Failed to exec command: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -101,13 +126,23 @@ class DaytonaClient {
 
     try {
       console.log(`[Daytona] Cloning repository: ${repoUrl} to ${targetPath}`);
+      console.log(`[Daytona] Sandbox ID: ${workspaceId}`);
+      console.log(`[Daytona] Starting git clone operation...`);
       
-      // Use Daytona SDK's built-in git.clone() method
-      await sandbox.git.clone(repoUrl, targetPath);
+      // Use Daytona SDK's built-in git.clone() method with timeout
+      const clonePromise = sandbox.git.clone(repoUrl, targetPath);
+      
+      // Add a timeout to detect if it's hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Git clone timeout after 120 seconds')), 120000);
+      });
+      
+      await Promise.race([clonePromise, timeoutPromise]);
       
       console.log(`[Daytona] Repository cloned successfully`);
     } catch (error) {
       console.error(`[Daytona] Git clone error:`, error);
+      console.error(`[Daytona] Error details:`, JSON.stringify(error, null, 2));
       throw new Error(`Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
