@@ -92,10 +92,19 @@ async function executeStep(
   runtime: string,
   onLog: LogCallback
 ): Promise<void> {
+  // Estimate time based on step type
+  const timeEstimates: Record<string, string> = {
+    install: '1-3 minutes',
+    build: '2-5 minutes',
+    run: '10-30 seconds',
+  };
+
+  const estimate = timeEstimates[step.verb] || '30-60 seconds';
+
   onLog({
     timestamp: new Date().toISOString(),
     level: 'info',
-    message: `Starting step: ${step.name}`,
+    message: `🔄 Starting: ${step.name} (est. ${estimate})`,
     step: step.name,
   });
 
@@ -104,7 +113,7 @@ async function executeStep(
   onLog({
     timestamp: new Date().toISOString(),
     level: 'info',
-    message: `Executing: ${command.join(' ')} in ${step.workdir || 'default dir'}`,
+    message: `💻 Executing: ${command.join(' ')} in ${step.workdir || 'default dir'}`,
     step: step.name,
   });
 
@@ -157,7 +166,7 @@ async function executeStep(
     onLog({
       timestamp: new Date().toISOString(),
       level: 'success',
-      message: `Step completed: ${step.name}`,
+      message: `✅ Completed: ${step.name}`,
       step: step.name,
     });
   } catch (error) {
@@ -241,22 +250,37 @@ export async function executePlan(
       message: `Cloning repository: ${repoUrl}`,
     });
 
-    await daytonaClient.exec(workspace.id, ['git', 'clone', repoUrl, 'repo'], {
-      timeout: 300000, // 5 min
-    });
-
     logWrapper({
       timestamp: new Date().toISOString(),
-      level: 'success',
-      message: 'Repository cloned successfully',
+      level: 'info',
+      message: '⏳ Cloning repository... (this may take 30-60 seconds)',
     });
+
+    try {
+      await daytonaClient.exec(workspace.id, ['git', 'clone', '--depth', '1', repoUrl, 'repo'], {
+        timeout: 120000, // 2 min - shallow clone should be fast
+      });
+
+      logWrapper({
+        timestamp: new Date().toISOString(),
+        level: 'success',
+        message: '✅ Repository cloned successfully',
+      });
+    } catch (error) {
+      logWrapper({
+        timestamp: new Date().toISOString(),
+        level: 'error',
+        message: `Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`,
+      });
+      throw error;
+    }
 
     // Check if pnpm is needed and install it
     if (plan.runtime.includes('node')) {
       logWrapper({
         timestamp: new Date().toISOString(),
         level: 'info',
-        message: 'Installing pnpm package manager...',
+        message: '📦 Installing pnpm package manager... (est. 20-30 seconds)',
       });
 
       try {
@@ -267,13 +291,13 @@ export async function executePlan(
         logWrapper({
           timestamp: new Date().toISOString(),
           level: 'success',
-          message: 'pnpm installed successfully',
+          message: '✅ pnpm installed successfully',
         });
       } catch (error) {
         logWrapper({
           timestamp: new Date().toISOString(),
           level: 'info',
-          message: 'Failed to install pnpm, will use npm instead',
+          message: '⚠️ Failed to install pnpm, will use npm instead',
         });
       }
     }
