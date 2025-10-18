@@ -257,9 +257,23 @@ export async function executePlan(
     });
 
     try {
-      await daytonaClient.exec(workspace.id, ['git', 'clone', '--depth', '1', repoUrl, 'repo'], {
+      logWrapper({
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        message: `🔧 [Dev] Executing: git clone --depth 1 ${repoUrl} repo`,
+      });
+
+      const cloneResult = await daytonaClient.exec(workspace.id, ['git', 'clone', '--depth', '1', repoUrl, 'repo'], {
         timeout: 120000, // 2 min - shallow clone should be fast
       });
+
+      if (cloneResult.stdout) {
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: `📝 Clone output: ${cloneResult.stdout.substring(0, 200)}${cloneResult.stdout.length > 200 ? '...' : ''}`,
+        });
+      }
 
       logWrapper({
         timestamp: new Date().toISOString(),
@@ -270,7 +284,7 @@ export async function executePlan(
       logWrapper({
         timestamp: new Date().toISOString(),
         level: 'error',
-        message: `Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`,
+        message: `❌ Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`,
       });
       throw error;
     }
@@ -284,9 +298,23 @@ export async function executePlan(
       });
 
       try {
-        await daytonaClient.exec(workspace.id, ['npm', 'install', '-g', 'pnpm'], {
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: '🔧 [Dev] Executing: npm install -g pnpm',
+        });
+
+        const pnpmResult = await daytonaClient.exec(workspace.id, ['npm', 'install', '-g', 'pnpm'], {
           timeout: 120000, // 2 min
         });
+
+        if (pnpmResult.stdout) {
+          logWrapper({
+            timestamp: new Date().toISOString(),
+            level: 'info',
+            message: `📝 pnpm install output: ${pnpmResult.stdout.substring(0, 150)}${pnpmResult.stdout.length > 150 ? '...' : ''}`,
+          });
+        }
 
         logWrapper({
           timestamp: new Date().toISOString(),
@@ -316,7 +344,13 @@ export async function executePlan(
         logWrapper({
           timestamp: new Date().toISOString(),
           level: 'info',
-          message: 'Starting server for built application...',
+          message: '🚀 Starting server for built application...',
+        });
+
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: `🔧 [Dev] Executing: npx serve -s apps/web/.next -l ${plan.ports[0]}`,
         });
         
         // Start npx serve in background to serve the built files
@@ -329,12 +363,18 @@ export async function executePlan(
         });
         
         // Give the server a moment to start
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: '⏳ Waiting for server to start... (2 seconds)',
+        });
+
         await new Promise(resolve => setTimeout(resolve, 2000));
         
         logWrapper({
           timestamp: new Date().toISOString(),
           level: 'success',
-          message: 'Server started successfully',
+          message: '✅ Server started successfully on port ' + plan.ports[0],
         });
       }
     }
