@@ -7,6 +7,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
   daytonaBaseUrl: process.env.DAYTONA_BASE_URL || 'http://localhost:3986',
+  daytonaApiKey: process.env.DAYTONA_API_KEY || '',
   workspaceTimeoutMs: parseInt(process.env.WORKSPACE_TIMEOUT_MS || '1800000', 10),
   maxMemoryMB: parseInt(process.env.MAX_MEMORY_MB || '2048', 10),
   allowedEgressDomains: (process.env.ALLOWED_EGRESS_DOMAINS || 'github.com,npmjs.com,registry.npmjs.org').split(','),
