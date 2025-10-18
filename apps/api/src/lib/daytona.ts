@@ -15,17 +15,29 @@ interface ExecOptions {
 }
 
 class DaytonaClient {
-  private daytona: Daytona;
+  private daytona: Daytona | null = null;
   private sandboxes: Map<string, Sandbox>;
+  private config: DaytonaConfig;
 
   constructor(daytonaConfig: DaytonaConfig) {
-    this.daytona = new Daytona(daytonaConfig);
+    this.config = daytonaConfig;
     this.sandboxes = new Map();
+  }
+
+  private getDaytona(): Daytona {
+    if (!this.daytona) {
+      if (!this.config.apiKey) {
+        throw new Error('DAYTONA_API_KEY is not set. Please add it to your .env file.');
+      }
+      this.daytona = new Daytona(this.config);
+    }
+    return this.daytona;
   }
 
   async createWorkspace(params: CreateWorkspaceParams) {
     // Create sandbox using official SDK
-    const sandbox = await this.daytona.create({
+    const daytona = this.getDaytona();
+    const sandbox = await daytona.create({
       image: params.image,
       resources: {
         memory: params.memoryMB || 2048,
