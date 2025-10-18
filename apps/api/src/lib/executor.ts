@@ -251,6 +251,33 @@ export async function executePlan(
       message: 'Repository cloned successfully',
     });
 
+    // Check if pnpm is needed and install it
+    if (plan.runtime.includes('node')) {
+      logWrapper({
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        message: 'Installing pnpm package manager...',
+      });
+
+      try {
+        await daytonaClient.exec(workspace.id, ['npm', 'install', '-g', 'pnpm'], {
+          timeout: 120000, // 2 min
+        });
+
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'success',
+          message: 'pnpm installed successfully',
+        });
+      } catch (error) {
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: 'Failed to install pnpm, will use npm instead',
+        });
+      }
+    }
+
     // Execute steps in the cloned repository
     for (const step of plan.steps) {
       await executeStep(
