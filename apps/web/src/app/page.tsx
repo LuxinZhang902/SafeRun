@@ -80,6 +80,8 @@ export default function Home() {
   const [error, setError] = useState('');
   const [devMode, setDevMode] = useState(false);
   const [currentRunId, setCurrentRunId] = useState<string | null>(null);
+  const [demoRiskScore, setDemoRiskScore] = useState(50);
+  const [showDemo, setShowDemo] = useState(false);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -489,7 +491,141 @@ export default function Home() {
               </p>
             )}
           </div>
+
+          {/* Interactive Demo Toggle */}
+          <div className="text-center mt-6">
+            <button
+              onClick={() => setShowDemo(!showDemo)}
+              className="text-sm text-blue-400 hover:text-blue-300 underline flex items-center gap-2 mx-auto"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              {showDemo ? 'Hide' : 'Show'} Threat Character Demo
+            </button>
+          </div>
         </div>
+
+        {/* Interactive Threat Demo */}
+        {showDemo && (
+          <div className="mb-8 max-w-4xl mx-auto">
+            <div className="bg-gradient-to-br from-purple-900/30 to-blue-900/30 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border-2 border-purple-500/30">
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold mb-2 flex items-center gap-3 justify-center">
+                  <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+                  Interactive Threat Character Demo
+                </h3>
+                <p className="text-sm text-gray-400">Adjust the slider to see different threat levels and characters</p>
+              </div>
+
+              {/* Character Display */}
+              <div className="flex flex-col md:flex-row items-center gap-8 mb-8">
+                <div className="flex-shrink-0">
+                  <ThreatPanelCharacter 
+                    riskScore={demoRiskScore} 
+                    riskLevel={demoRiskScore < 30 ? 'low' : demoRiskScore < 70 ? 'medium' : 'high'} 
+                  />
+                </div>
+                
+                <div className="flex-1 w-full">
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="text-sm font-semibold text-gray-300">Risk Score</span>
+                      <span className={`text-3xl font-bold px-4 py-2 rounded-lg ${
+                        demoRiskScore < 30 ? 'text-green-400 bg-green-500/20' :
+                        demoRiskScore < 50 ? 'text-blue-400 bg-blue-500/20' :
+                        demoRiskScore < 70 ? 'text-yellow-400 bg-yellow-500/20' :
+                        demoRiskScore < 85 ? 'text-orange-400 bg-orange-500/20' :
+                        'text-red-400 bg-red-500/20'
+                      }`}>{demoRiskScore}</span>
+                    </div>
+                    
+                    {/* Interactive Slider */}
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={demoRiskScore}
+                      onChange={(e) => setDemoRiskScore(parseInt(e.target.value))}
+                      className="w-full h-3 bg-gradient-to-r from-green-500 via-yellow-500 via-orange-500 to-red-500 rounded-lg appearance-none cursor-pointer slider"
+                      style={{
+                        background: `linear-gradient(to right, 
+                          #10b981 0%, 
+                          #3b82f6 20%, 
+                          #eab308 40%, 
+                          #f97316 60%, 
+                          #ef4444 80%, 
+                          #dc2626 100%)`
+                      }}
+                    />
+                    
+                    {/* Level Markers */}
+                    <div className="flex justify-between text-xs text-gray-500 mt-2 px-1">
+                      <span>0</span>
+                      <span>25</span>
+                      <span>50</span>
+                      <span>75</span>
+                      <span>100</span>
+                    </div>
+                  </div>
+
+                  {/* Threat Level Info */}
+                  <div className="bg-slate-800/50 rounded-xl p-4">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className={`px-3 py-1 rounded-lg font-semibold text-sm ${
+                        demoRiskScore < 30 ? 'bg-green-500/20 text-green-400 border border-green-500/50' :
+                        demoRiskScore < 50 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/50' :
+                        demoRiskScore < 70 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' :
+                        demoRiskScore < 85 ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50' :
+                        'bg-red-500/20 text-red-400 border border-red-500/50'
+                      }`}>
+                        {demoRiskScore < 30 ? 'SAFE / LOW RISK' :
+                         demoRiskScore < 50 ? 'MEDIUM RISK' :
+                         demoRiskScore < 70 ? 'HIGH RISK' :
+                         demoRiskScore < 85 ? 'VERY HIGH RISK' :
+                         'CRITICAL RISK'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-400">
+                      {demoRiskScore < 30 ? '✅ Repository appears safe with minimal security concerns. Good to proceed with execution.' :
+                       demoRiskScore < 50 ? '⚠️ Some security concerns detected. Review before execution recommended.' :
+                       demoRiskScore < 70 ? '🔶 Significant security risks found. Careful review required before execution.' :
+                       demoRiskScore < 85 ? '⛔ High security risks detected. Execution not recommended without mitigation.' :
+                       '🚨 Critical security threats identified. Do not execute without thorough security review.'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Select Buttons */}
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                {[
+                  { score: 0, label: 'Safe', color: 'green' },
+                  { score: 25, label: 'Low', color: 'blue' },
+                  { score: 40, label: 'Medium', color: 'yellow' },
+                  { score: 60, label: 'High', color: 'orange' },
+                  { score: 75, label: 'V.High', color: 'red' },
+                  { score: 90, label: 'Critical', color: 'rose' },
+                ].map((preset) => (
+                  <button
+                    key={preset.score}
+                    onClick={() => setDemoRiskScore(preset.score)}
+                    className={`px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                      Math.abs(demoRiskScore - preset.score) < 15
+                        ? `bg-${preset.color}-500/30 text-${preset.color}-300 border-2 border-${preset.color}-500`
+                        : `bg-slate-800/50 text-gray-400 border border-slate-700 hover:border-${preset.color}-500/50`
+                    }`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Security Analysis */}
         {security && (
