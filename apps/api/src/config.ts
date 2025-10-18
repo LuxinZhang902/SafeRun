@@ -8,7 +8,7 @@ export const config = {
   port: parseInt(process.env.PORT || '3000', 10),
   nodeEnv: process.env.NODE_ENV || 'development',
   anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
-  daytonaBaseUrl: process.env.DAYTONA_BASE_URL || 'https://api.daytona.io',
+  daytonaBaseUrl: process.env.DAYTONA_BASE_URL || 'https://app.daytona.io/api',
   daytonaApiKey: process.env.DAYTONA_API_KEY || '',
   workspaceTimeoutMs: parseInt(process.env.WORKSPACE_TIMEOUT_MS || '1800000', 10),
   maxMemoryMB: parseInt(process.env.MAX_MEMORY_MB || '2048', 10),
