@@ -119,8 +119,21 @@ export default function Home() {
 
     setLoading(true);
     setError('');
-    setLogs([]);
     setStatus({});
+    
+    // Show immediate feedback
+    setLogs([
+      {
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        message: '🚀 Starting execution...',
+      },
+      {
+        timestamp: new Date().toISOString(),
+        level: 'info',
+        message: '📡 Connecting to execution server...',
+      },
+    ]);
 
     try {
       const response = await fetch(`${API_BASE}/api/execute`, {
@@ -134,6 +147,16 @@ export default function Home() {
       if (!data.success) {
         throw new Error(data.error || 'Failed to execute plan');
       }
+
+      // Add log that execution started
+      setLogs((prev) => [
+        ...prev,
+        {
+          timestamp: new Date().toISOString(),
+          level: 'success',
+          message: '✅ Connected! Streaming logs in real-time...',
+        },
+      ]);
 
       // Store runId and start streaming logs
       setCurrentRunId(data.runId);
