@@ -34,7 +34,7 @@ async function start() {
       host: '0.0.0.0',
     });
 
-    console.log(`🚀 Initium API server running on http://localhost:${config.port}`);
+    console.log(`🚀 SafeRun API server running on http://localhost:${config.port}`);
     console.log(`📊 Health check: http://localhost:${config.port}/health`);
   } catch (error) {
     fastify.log.error(error);
