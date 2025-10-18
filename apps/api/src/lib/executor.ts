@@ -243,7 +243,7 @@ export async function executePlan(
       message: `Workspace created: ${workspace.id}`,
     });
 
-    // Clone repository using git clone
+    // Clone repository using Daytona SDK's built-in git.clone()
     logWrapper({
       timestamp: new Date().toISOString(),
       level: 'info',
@@ -260,20 +260,11 @@ export async function executePlan(
       logWrapper({
         timestamp: new Date().toISOString(),
         level: 'info',
-        message: `🔧 [Dev] Executing: git clone --depth 1 ${repoUrl} repo`,
+        message: `🔧 [Dev] Using Daytona SDK git.clone() method`,
       });
 
-      const cloneResult = await daytonaClient.exec(workspace.id, ['git', 'clone', '--depth', '1', repoUrl, 'repo'], {
-        timeout: 120000, // 2 min - shallow clone should be fast
-      });
-
-      if (cloneResult.stdout) {
-        logWrapper({
-          timestamp: new Date().toISOString(),
-          level: 'info',
-          message: `📝 Clone output: ${cloneResult.stdout.substring(0, 200)}${cloneResult.stdout.length > 200 ? '...' : ''}`,
-        });
-      }
+      // Use Daytona SDK's built-in git clone (more reliable than executeCommand)
+      await daytonaClient.cloneRepo(workspace.id, repoUrl, 'repo');
 
       logWrapper({
         timestamp: new Date().toISOString(),

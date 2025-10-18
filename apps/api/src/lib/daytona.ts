@@ -93,6 +93,26 @@ class DaytonaClient {
     }
   }
 
+  async cloneRepo(workspaceId: string, repoUrl: string, targetPath: string) {
+    // Get the sandbox instance
+    const sandbox = this.sandboxes.get(workspaceId);
+    if (!sandbox) {
+      throw new Error(`Sandbox ${workspaceId} not found`);
+    }
+
+    try {
+      console.log(`[Daytona] Cloning repository: ${repoUrl} to ${targetPath}`);
+      
+      // Use Daytona SDK's built-in git.clone() method
+      await sandbox.git.clone(repoUrl, targetPath);
+      
+      console.log(`[Daytona] Repository cloned successfully`);
+    } catch (error) {
+      console.error(`[Daytona] Git clone error:`, error);
+      throw new Error(`Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
   async expose(workspaceId: string, port: number) {
     // Get the sandbox instance
     const sandbox = this.sandboxes.get(workspaceId);
