@@ -37,10 +37,16 @@ class DaytonaClient {
   async createWorkspace(params: CreateWorkspaceParams) {
     // Create sandbox using official SDK
     const daytona = this.getDaytona();
+    
+    // Convert MB to GiB for Daytona SDK (SDK expects memory in GiB)
+    const memoryMB = params.memoryMB || 2048;
+    const memoryGiB = Math.ceil(memoryMB / 1024); // Convert MB to GiB, max 8 GiB
+    const memoryToUse = Math.min(memoryGiB, 8); // Ensure we don't exceed 8 GiB limit
+    
     const sandbox = await daytona.create({
       image: params.image,
       resources: {
-        memory: params.memoryMB || 2048,
+        memory: memoryToUse, // In GiB (e.g., 2 = 2 GiB)
       },
     });
 
