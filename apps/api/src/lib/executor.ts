@@ -332,6 +332,18 @@ export async function executePlan(
 
     // Execute steps in the cloned repository
     for (const step of plan.steps) {
+      // Skip 'run' step as it's a long-running process that never exits
+      // We'll start our own server after the build step instead
+      if (step.verb === 'run') {
+        logWrapper({
+          timestamp: new Date().toISOString(),
+          level: 'info',
+          message: `⏭️ Skipping run step - will start server after build completes`,
+          step: step.name,
+        });
+        continue;
+      }
+
       await executeStep(
         workspace.id,
         { ...step, workdir: step.workdir || 'repo' },
