@@ -67,19 +67,30 @@ class DaytonaClient {
       throw new Error(`Sandbox ${workspaceId} not found`);
     }
 
-    // Execute command in sandbox using official SDK
-    const result = await sandbox.process.executeCommand(
-      command.join(' '),
-      options.workdir,
-      options.env,
-      options.timeout ? options.timeout / 1000 : undefined // Convert ms to seconds
-    );
+    try {
+      // Execute command in sandbox using official SDK
+      console.log(`[Daytona] Executing command: ${command.join(' ')}`);
+      console.log(`[Daytona] Working directory: ${options.workdir || 'default'}`);
+      
+      const result = await sandbox.process.executeCommand(
+        command.join(' '),
+        options.workdir,
+        options.env,
+        options.timeout ? options.timeout / 1000 : undefined // Convert ms to seconds
+      );
 
-    return {
-      stdout: result.result || '',
-      stderr: '', // Daytona SDK doesn't separate stderr
-      exitCode: result.exitCode,
-    };
+      console.log(`[Daytona] Command completed: exitCode=${result.exitCode}`);
+      console.log(`[Daytona] Result output length: ${result.result?.length || 0}`);
+
+      return {
+        stdout: result.result || '',
+        stderr: '', // Daytona SDK doesn't separate stderr
+        exitCode: result.exitCode,
+      };
+    } catch (error) {
+      console.error(`[Daytona] Command execution error:`, error);
+      throw new Error(`Failed to exec command: ${error instanceof Error ? error.message : String(error)}`);
+    }
   }
 
   async expose(workspaceId: string, port: number) {

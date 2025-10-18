@@ -104,7 +104,7 @@ async function executeStep(
   onLog({
     timestamp: new Date().toISOString(),
     level: 'info',
-    message: `Executing: ${command.join(' ')}`,
+    message: `Executing: ${command.join(' ')} in ${step.workdir || 'default dir'}`,
     step: step.name,
   });
 
@@ -113,6 +113,14 @@ async function executeStep(
       workdir: step.workdir,
       env: step.env,
       timeout: step.timeout,
+    });
+
+    // Debug: Log the raw result
+    onLog({
+      timestamp: new Date().toISOString(),
+      level: 'info',
+      message: `Command result: exitCode=${result.exitCode}, stdout length=${result.stdout?.length || 0}, stderr length=${result.stderr?.length || 0}`,
+      step: step.name,
     });
 
     // Log stdout if present
@@ -226,15 +234,14 @@ export async function executePlan(
       message: `Workspace created: ${workspace.id}`,
     });
 
-    // Clone repository
+    // Clone repository using git clone
     logWrapper({
       timestamp: new Date().toISOString(),
       level: 'info',
       message: `Cloning repository: ${repoUrl}`,
     });
 
-    await daytonaClient.exec(workspace.id, ['git', 'clone', repoUrl, '/workspace/repo'], {
-      workdir: '/workspace',
+    await daytonaClient.exec(workspace.id, ['git', 'clone', repoUrl, 'repo'], {
       timeout: 300000, // 5 min
     });
 
@@ -244,11 +251,11 @@ export async function executePlan(
       message: 'Repository cloned successfully',
     });
 
-    // Execute steps
+    // Execute steps in the cloned repository
     for (const step of plan.steps) {
       await executeStep(
         workspace.id,
-        { ...step, workdir: step.workdir || '/workspace/repo' },
+        { ...step, workdir: step.workdir || 'repo' },
         plan.runtime,
         logWrapper
       );
