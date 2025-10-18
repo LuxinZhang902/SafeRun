@@ -1,6 +1,10 @@
 # Deployment Guide
 
-This guide covers deploying Initium to production environments.
+This guide covers deploying SafeRun to production environments.
+
+## Quick Start: Vercel Deployment 🚀
+
+**Recommended for hackathons and demos!**
 
 ## Prerequisites
 
@@ -262,20 +266,58 @@ Deploy:
 kubectl apply -f k8s/
 ```
 
-### Option 4: Vercel (Web) + Railway/Render (API)
+### Option 4: Vercel (Recommended for Hackathons) 🚀
 
-#### Deploy Web to Vercel
+#### Step 1: Deploy Frontend to Vercel
 
-```bash
-cd apps/web
-vercel --prod
-```
+1. **Install Vercel CLI:**
+   ```bash
+   npm install -g vercel
+   ```
 
-#### Deploy API to Railway
+2. **Deploy Web App:**
+   ```bash
+   cd apps/web
+   vercel --prod
+   ```
 
+3. **Set Environment Variables in Vercel Dashboard:**
+   - Go to your project settings
+   - Add: `NEXT_PUBLIC_API_URL` = `https://your-api-url.vercel.app`
+
+#### Step 2: Deploy API to Vercel
+
+1. **Deploy API:**
+   ```bash
+   cd apps/api
+   vercel --prod
+   ```
+
+2. **Set Environment Variables in Vercel Dashboard:**
+   - `DAYTONA_API_KEY` = your Daytona API key
+   - `DAYTONA_BASE_URL` = `https://api.daytona.io`
+   - `ANTHROPIC_API_KEY` = your Anthropic API key (optional)
+   - `PROMPTSHIELD_API_KEY` = your PromptShield key (optional)
+   - `PORT` = `3000`
+
+3. **Update Frontend URL:**
+   - Go back to web app settings
+   - Update `NEXT_PUBLIC_API_URL` with your deployed API URL
+
+#### Alternative: Deploy API to Railway/Render
+
+**Railway:**
 1. Connect GitHub repository
-2. Set environment variables
-3. Deploy from `apps/api` directory
+2. Select `apps/api` as root directory
+3. Set environment variables
+4. Deploy automatically
+
+**Render:**
+1. Create new Web Service
+2. Connect repository
+3. Set root directory to `apps/api`
+4. Add environment variables
+5. Deploy
 
 ## Reverse Proxy (Nginx)
 
