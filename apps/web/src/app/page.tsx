@@ -36,6 +36,7 @@ export default function Home() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [status, setStatus] = useState<ExecutionStatus>({});
   const [error, setError] = useState('');
+  const [devMode, setDevMode] = useState(false);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -501,11 +502,25 @@ export default function Home() {
                 </svg>
                 Execution Plan
               </h2>
-              <button
-                onClick={executePlan}
-                disabled={loading || (security ? security.risk_score >= 50 : false)}
-                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed px-8 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-green-500/50 disabled:shadow-none flex items-center gap-2"
-              >
+              <div className="flex items-center gap-4">
+                {/* Developer Mode Toggle */}
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={devMode}
+                    onChange={(e) => setDevMode(e.target.checked)}
+                    className="w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm text-gray-300">
+                    🔧 Developer Mode (detailed logs)
+                  </span>
+                </label>
+                
+                <button
+                  onClick={executePlan}
+                  disabled={loading || (security ? security.risk_score >= 50 : false)}
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-700 disabled:to-gray-800 disabled:cursor-not-allowed px-8 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-green-500/50 disabled:shadow-none flex items-center gap-2"
+                >
                 {loading ? (
                   <>
                     <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
@@ -545,6 +560,7 @@ export default function Home() {
                   </>
                 )}
               </button>
+              </div>
             </div>
             {security && security.risk_score >= 50 && (
               <div className="mb-4 p-4 bg-red-500/10 border border-red-500/50 rounded-xl flex items-start gap-3">
@@ -618,18 +634,32 @@ export default function Home() {
               Execution Logs
             </h2>
             <div className="bg-slate-950/70 rounded-xl p-6 h-96 overflow-y-auto font-mono text-sm border border-slate-700/30 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-900">
+              {logs.length === 0 && !loading && (
+                <div className="text-gray-500 text-center py-8">
+                  No logs yet. Click "Execute Plan" to start.
+                </div>
+              )}
               {logs.map((log, idx) => (
                 <div key={idx} className={`mb-1 ${getLogColor(log.level)}`}>
                   <span className="text-gray-500">
                     [{new Date(log.timestamp).toLocaleTimeString()}]
                   </span>
+                  {devMode && (
+                    <span className="text-purple-400 text-xs"> [{log.level.toUpperCase()}]</span>
+                  )}
                   {log.step && <span className="text-blue-400"> [{log.step}]</span>}
                   <span> {log.message}</span>
+                  {devMode && log.message.length > 100 && (
+                    <div className="ml-8 mt-1 text-xs text-gray-600 whitespace-pre-wrap">
+                      {/* Show full message in dev mode */}
+                    </div>
+                  )}
                 </div>
               ))}
               {loading && (
                 <div className="text-gray-500 animate-pulse">
-                  <span>● Streaming logs...</span>
+                  <span>● Streaming logs in real-time...</span>
+                  {devMode && <span className="text-xs ml-2">(Developer Mode Active)</span>}
                 </div>
               )}
             </div>
