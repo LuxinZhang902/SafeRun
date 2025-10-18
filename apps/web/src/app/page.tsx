@@ -601,7 +601,7 @@ export default function Home() {
               </div>
 
               {/* Quick Select Buttons */}
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+              <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-6">
                 {[
                   { score: 0, label: 'Safe', color: 'green' },
                   { score: 25, label: 'Low', color: 'blue' },
@@ -622,6 +622,116 @@ export default function Home() {
                     {preset.label}
                   </button>
                 ))}
+              </div>
+
+              {/* Demo Threat Categories */}
+              <div className="bg-slate-800/50 rounded-xl p-6">
+                <h4 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Demo Threat Categories
+                </h4>
+                <div className="space-y-3">
+                  {(() => {
+                    const categories = [];
+                    
+                    // Add categories based on risk score
+                    if (demoRiskScore >= 20) {
+                      categories.push({
+                        name: 'Code Injection',
+                        severity: demoRiskScore >= 70 ? 'high' : demoRiskScore >= 40 ? 'medium' : 'low',
+                        description: 'Potential code injection vulnerabilities detected in user input handling'
+                      });
+                    }
+                    
+                    if (demoRiskScore >= 30) {
+                      categories.push({
+                        name: 'Dependency Risks',
+                        severity: demoRiskScore >= 80 ? 'high' : demoRiskScore >= 50 ? 'medium' : 'low',
+                        description: 'Outdated or vulnerable dependencies found in package.json'
+                      });
+                    }
+                    
+                    if (demoRiskScore >= 40) {
+                      categories.push({
+                        name: 'Authentication Issues',
+                        severity: demoRiskScore >= 75 ? 'high' : 'medium',
+                        description: 'Weak authentication mechanisms or missing security headers'
+                      });
+                    }
+                    
+                    if (demoRiskScore >= 50) {
+                      categories.push({
+                        name: 'Data Exposure',
+                        severity: demoRiskScore >= 85 ? 'high' : 'medium',
+                        description: 'Sensitive data may be exposed through API endpoints or logs'
+                      });
+                    }
+                    
+                    if (demoRiskScore >= 60) {
+                      categories.push({
+                        name: 'Malicious Patterns',
+                        severity: 'high',
+                        description: 'Suspicious code patterns that may indicate malicious intent'
+                      });
+                    }
+                    
+                    if (demoRiskScore >= 80) {
+                      categories.push({
+                        name: 'Critical Vulnerabilities',
+                        severity: 'high',
+                        description: 'Known CVEs or critical security flaws detected in codebase'
+                      });
+                    }
+                    
+                    if (categories.length === 0) {
+                      categories.push({
+                        name: 'No Threats Detected',
+                        severity: 'low',
+                        description: 'Repository appears clean with no significant security concerns'
+                      });
+                    }
+                    
+                    return categories.map((cat, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 rounded-lg bg-slate-900/50 border border-slate-700/50">
+                        <span className={`w-3 h-3 rounded-full mt-1 flex-shrink-0 ${
+                          cat.severity === 'high' ? 'bg-red-500 shadow-lg shadow-red-500/50' : 
+                          cat.severity === 'medium' ? 'bg-yellow-500 shadow-lg shadow-yellow-500/50' : 
+                          'bg-blue-500 shadow-lg shadow-blue-500/50'
+                        }`}></span>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-sm font-medium text-gray-200">{cat.name}</p>
+                            <span className={`text-xs px-2 py-0.5 rounded ${
+                              cat.severity === 'high' ? 'bg-red-500/20 text-red-400' :
+                              cat.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                              'bg-blue-500/20 text-blue-400'
+                            }`}>
+                              {cat.severity.toUpperCase()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-400">{cat.description}</p>
+                        </div>
+                      </div>
+                    ));
+                  })()}
+                </div>
+                
+                {/* Threat Count Summary */}
+                <div className="mt-4 pt-4 border-t border-slate-700/50">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Total Threats Detected:</span>
+                    <span className="font-bold text-white">
+                      {demoRiskScore < 20 ? '0' :
+                       demoRiskScore < 30 ? '1' :
+                       demoRiskScore < 40 ? '2' :
+                       demoRiskScore < 50 ? '3' :
+                       demoRiskScore < 60 ? '4' :
+                       demoRiskScore < 80 ? '5' : '6'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
