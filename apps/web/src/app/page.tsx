@@ -171,7 +171,7 @@ export default function Home() {
         <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-cyan-500/10 to-emerald-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto p-8">
+      <div className="relative max-w-4xl mx-auto p-8">
         {/* Header */}
         <div className="mb-12 text-center">
           <div className="inline-flex items-center gap-3 mb-4">
@@ -190,6 +190,17 @@ export default function Home() {
           <p className="text-sm text-gray-500 mt-2">
             Multi-layer security • Real-time analysis • Isolated execution
           </p>
+          <div className="mt-6">
+            <a
+              href="/how-to-use"
+              className="inline-flex items-center gap-2 bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/50 hover:border-slate-500/50 px-6 py-3 rounded-xl font-medium transition-all"
+            >
+              <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+              How to Use
+            </a>
+          </div>
         </div>
 
         {/* Input Section */}
@@ -415,43 +426,6 @@ export default function Home() {
                 )}
               </div>
             )}
-          </div>
-        )}
-
-        {/* Instructions */}
-        {!plan && !loading && !planLoading && (
-          <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-slate-700/50">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              How to Use SafeRun
-            </h2>
-            <div className="space-y-4">
-              {[
-                { icon: '📋', text: 'Paste a GitHub repository URL', detail: 'e.g., https://github.com/remix-run/examples/tree/main/basic' },
-                { icon: '🔍', text: 'Click "Analyze & Generate"', detail: 'AI analyzes security and generates execution plan' },
-                { icon: '🛡️', text: 'Review security analysis', detail: 'Check risk score and readiness before execution' },
-                { icon: '▶️', text: 'Execute the plan', detail: 'Run code in isolated Daytona workspace' },
-                { icon: '📊', text: 'Monitor real-time logs', detail: 'Watch execution progress and get preview URLs' }
-              ].map((step, idx) => (
-                <div key={idx} className="flex items-start gap-4 p-4 bg-slate-900/30 rounded-xl border border-slate-700/30 hover:border-slate-600/50 transition-colors">
-                  <span className="text-3xl flex-shrink-0">{step.icon}</span>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-200">{idx + 1}. {step.text}</p>
-                    <p className="text-sm text-gray-400 mt-1">{step.detail}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-              <p className="text-sm text-blue-300 flex items-start gap-2">
-                <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span><strong>Security First:</strong> High/Critical risk repositories are automatically blocked from execution.</span>
-              </p>
-            </div>
           </div>
         )}
 
