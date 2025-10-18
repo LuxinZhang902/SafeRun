@@ -36,8 +36,8 @@ function mapVerbToCommand(step: PlanStep, runtime: string): string[] {
   switch (verb) {
     case 'install':
       if (isNode) {
-        // Use npm (available in all node images) instead of pnpm
-        return ['npm', 'install', ...args];
+        // Use pnpm if available (we install it globally), otherwise npm
+        return ['pnpm', 'install', ...args];
       } else if (isPython) {
         return ['pip', 'install', '-r', 'requirements.txt', ...args];
       } else if (isRust) {
