@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { fetchRepoContext } from '../lib/repo';
-import { generatePlan } from '../lib/llm';
+import { generateSimplePlan } from '../lib/simplePlanGenerator';
 import { scanRepository, getRiskLevel } from '../lib/rules';
 import { analyzeRepositorySecurity } from '../lib/llmSecurity';
 import YAML from 'yaml';
@@ -57,8 +57,10 @@ export async function planRoutes(fastify: FastifyInstance) {
           readinessScore: securityAnalysis.readiness_score,
         }, 'Security analysis completed');
 
-        // Step 4: Generate execution plan using Claude
-        const plan = await generatePlan(repoContext);
+        // Step 4: Generate execution plan (simple detection - NO AI)
+        const plan = generateSimplePlan(repoUrl, repoContext.manifests);
+
+        request.log.info({ plan }, 'Simple plan generated (no AI)');
 
         // Step 5: Return comprehensive response
         return reply.send({
