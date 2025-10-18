@@ -26,7 +26,7 @@ interface SecurityInfo {
 }
 
 export default function Home() {
-  const [repoUrl, setRepoUrl] = useState('https://github.com/remix-run/examples/tree/main/basic');
+  const [repoUrl, setRepoUrl] = useState('https://github.com/vercel/next-learn-starter');
   const [loading, setLoading] = useState(false);
   const [securityLoading, setSecurityLoading] = useState(false);
   const [planLoading, setPlanLoading] = useState(false);

@@ -88,8 +88,7 @@ class DaytonaClient {
         exitCode: result.exitCode,
       };
     } catch (error) {
-      console.error(`[Daytona] Command execution error:`, error);
-      throw new Error(`Failed to exec command: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(`Failed to clone repository: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -151,6 +150,21 @@ class DaytonaClient {
     this.sandboxes.delete(workspaceId);
 
     return { success: true };
+  }
+
+  async destroyById(sandboxId: string) {
+    try {
+      console.log(`[Daytona] Destroying sandbox by ID: ${sandboxId}`);
+      const daytona = this.getDaytona();
+      const sandbox = await daytona.create({ id: sandboxId });
+      await sandbox.delete();
+      this.sandboxes.delete(sandboxId);
+      console.log(`[Daytona] Destroyed: ${sandboxId}`);
+      return { success: true };
+    } catch (error) {
+      console.error(`[Daytona] Failed to destroy ${sandboxId}:`, error);
+      throw error;
+    }
   }
 }
 
