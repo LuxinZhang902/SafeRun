@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "buildCommand": "cd ../.. && pnpm install && pnpm --filter api build",
   "builds": [
     {
       "src": "dist/index.js",
@@ -11,12 +12,5 @@
       "src": "/(.*)",
       "dest": "dist/index.js"
     }
-  ],
-  "env": {
-    "DAYTONA_API_KEY": "@daytona-api-key",
-    "DAYTONA_BASE_URL": "@daytona-base-url",
-    "ANTHROPIC_API_KEY": "@anthropic-api-key",
-    "PROMPTSHIELD_API_KEY": "@promptshield-api-key",
-    "PORT": "3000"
-  }
+  ]
 }
